@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TokenManagementSesion</string>
+    <string name="sharedPreferences_token"></string>
 </resources>
