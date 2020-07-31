@@ -7,6 +7,10 @@ import android.se.omapi.Session;
 import android.service.textservice.SpellCheckerService;
 import android.util.Base64;
 
+import com.example.tokenmanagementsesion.pojo.PostRespon;
+import com.example.tokenmanagementsesion.pojo.ResponGetToken;
+import com.example.tokenmanagementsesion.sharedPref.Sessionpref;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -18,12 +22,12 @@ import okhttp3.Response;
 public class AuthorizationInterceptor implements Interceptor {
 
     private ApiService apiService;
-    private Session session;
+    private Sessionpref sessionpref;
 
 
-    public AuthorizationInterceptor(ApiService apiService, Session session) {
+    public AuthorizationInterceptor(ApiService apiService, Sessionpref sessionpref) {
         this.apiService = apiService;
-        this.session = session;
+        this.sessionpref = sessionpref;
     }
 
     @NotNull
@@ -33,22 +37,22 @@ public class AuthorizationInterceptor implements Interceptor {
         Response mainResponse = chain.proceed(chain.request());
         Request mainRequest = chain.request();
 
-        if (session.isLoggedIn()) {
+        if (sessionpref.isLoggedIn()) {
             // if response code is 401 or 403, 'mainRequest' has encountered authentication error
             if (mainResponse.code() == 401 || mainResponse.code() == 403) {
-                String authKey = getAuthorizationHeader(session.getEmail(), session.getPassword());git stat
+                String authKey = getAuthorizationHeader(sessionpref.getEmail(), sessionpref.getPassword());
                 // request to login API to get fresh token
                 // synchronously calling login API
-                retrofit2.Response<Authorization> loginResponse = apiService.loginAccount(authKey).execute();
+                retrofit2.Response<PostRespon> loginResponse = apiService.loginAccount(authKey).execute();
 
                 if (loginResponse.isSuccessful()) {
                     // login request succeed, new token generated
-                    Authorization authorization = loginResponse.body();
+                    PostRespon authorization = loginResponse.body();
                     // save the new token
-                    session.saveToken(authorization.getToken());
+                    sessionpref.saveToken(authorization.getToken());
                     // retry the 'mainRequest' which encountered an authentication error
                     // add new token into 'mainRequest' header and request again
-                    Request.Builder builder = mainRequest.newBuilder().header("Authorization", session.getToken()).
+                    Request.Builder builder = mainRequest.newBuilder().header("Authorization", sessionpref.getToken()).
                             method(mainRequest.method(), mainRequest.body());
                     mainResponse = chain.proceed(builder.build());
                 }
