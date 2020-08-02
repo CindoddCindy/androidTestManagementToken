@@ -9,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tokenmanagementsesion.retro.ApiService;
+import com.example.tokenmanagementsesion.retro.AuthorizationInterceptor;
+
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -36,6 +39,48 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void loginUser(){
+        String login_email=editText_email.getText().toString();
+        String login_password=editText_pass.getText().toString();
+
+
+        AuthorizationInterceptor authorizationInterceptor = ApiService..getRetrofit().create(RetrofitServices.class);
+        Call<LoginResponse> call=retrofitServices.isValidUser(login_email,login_password);
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+
+                String status = response.body().getMessage();
+                LoginResponse loginResponse = response.body();
+                if (response.isSuccessful()) {
+                    Log.d("Server Response", "failed" + loginResponse.getData());
+                    //textView_log.setText(loginResponse.getMessage());
+                    Intent intent = new Intent(LoginOrMakeAccount.this,ActivityNampungFragmnet.class);
+                    startActivity(intent);
+                    finish();
+                }
+
+                else  {
+                    textView_log.setText("User Not Found");
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.d("Server Response","success"+t.toString());
+                textView_log.setText("Connection not found");
+
+
+
+
+            }
+        });
+
+
     }
 
 

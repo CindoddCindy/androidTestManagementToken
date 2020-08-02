@@ -22,12 +22,16 @@ import okhttp3.Response;
 public class AuthorizationInterceptor implements Interceptor {
 
     private ApiService apiService;
-    private Sessionpref sessionpref;
+     private  Sessions sessions;
 
 
-    public AuthorizationInterceptor(ApiService apiService, Sessionpref sessionpref) {
+    public AuthorizationInterceptor(ApiService apiService,Sessions sessions) {
         this.apiService = apiService;
-        this.sessionpref = sessionpref;
+        this.sessions = sessions;
+    }
+
+    public void getRetrofit(){
+        intercept();
     }
 
     @NotNull
@@ -37,22 +41,24 @@ public class AuthorizationInterceptor implements Interceptor {
         Response mainResponse = chain.proceed(chain.request());
         Request mainRequest = chain.request();
 
-        if (sessionpref.isLoggedIn()) {
+        if (sessions.isLoggedIn()) {
             // if response code is 401 or 403, 'mainRequest' has encountered authentication error
             if (mainResponse.code() == 401 || mainResponse.code() == 403) {
-                String authKey = getAuthorizationHeader(sessionpref.getEmail(), sessionpref.getPassword());
+               // String authKey = getAuthorizationHeader(sessions.getEmail(), sessions.getPassword());
+                String email =getEmail(sessions.getEmail());
+                String pass = getPassword(sessions.getPassword());
                 // request to login API to get fresh token
                 // synchronously calling login API
-                retrofit2.Response<PostRespon> loginResponse = apiService.loginAccount(authKey).execute();
+                retrofit2.Response<PostRespon> loginResponse = apiService.loginAccount(email,pass).execute();
 
                 if (loginResponse.isSuccessful()) {
                     // login request succeed, new token generated
                     PostRespon authorization = loginResponse.body();
                     // save the new token
-                    sessionpref.saveToken(authorization.getToken());
+                    sessions.saveToken(authorization.getToken());
                     // retry the 'mainRequest' which encountered an authentication error
                     // add new token into 'mainRequest' header and request again
-                    Request.Builder builder = mainRequest.newBuilder().header("Authorization", sessionpref.getToken()).
+                    Request.Builder builder = mainRequest.newBuilder().header("Authorization", sessions.getToken()).
                             method(mainRequest.method(), mainRequest.body());
                     mainResponse = chain.proceed(builder.build());
                 }
@@ -66,9 +72,18 @@ public class AuthorizationInterceptor implements Interceptor {
      * this method is API implemetation specific
      * might not work with other APIs
      **/
-    public static String getAuthorizationHeader(String email, String password) {
+    public static String getEmail(String email) {
+        /*
         String credential = email + ":" + password;
         return "Basic " + Base64.encodeToString(credential.getBytes(), Base64.DEFAULT);
+
+         */
+        return email;
+
+    }
+
+    public static String getPassword(String password){
+        return password;
 
     }
 }

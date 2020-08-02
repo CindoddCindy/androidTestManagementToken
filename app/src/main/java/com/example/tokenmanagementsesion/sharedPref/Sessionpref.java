@@ -9,160 +9,55 @@ import com.example.tokenmanagementsesion.MainActivity;
 
 import java.util.HashMap;
 
-public class Sessionpref {
-    // Shared Preferences
-    SharedPreferences pref;
+public class Sessionpref {public static final String SP_USER_LOGIN="user_login";
+    public static final String SP_EMAIL="email";
+    public static final String SP_PASS="pass";
+    public static final String SP_SUDAH_LOGIN="spSudahLogin";
+    public static final String SP_DAPAT_TOKEN="dapatToken";
 
-    // Editor for Shared preferences
-    SharedPreferences.Editor editor;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor spEditor;
 
-    // Context
-    Context _context;
 
-    // Shared pref mode
-    int PRIVATE_MODE = 0;
-
-    // Sharedpref file name
-    private static final String PREF_NAME = "AndroidHivePref";
-
-    // All Shared Preferences Keys
-    private static final String IS_LOGIN = "IsLoggedIn";
-
-    // User name (make variable public to access from outside)
-    public static final String KEY_NAME = "name";
-
-    // Email address (make variable public to access from outside)
-    public static final String KEY_EMAIL = "email";
-
-    // Constructor
     public Sessionpref(Context context){
-        this._context = context;
-        pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
-        editor = pref.edit();
+        sharedPreferences=context.getSharedPreferences(SP_USER_LOGIN,Context.MODE_PRIVATE);
+        spEditor= sharedPreferences.edit();
     }
 
-    /**
-     * Create login session
-     * */
-    public void createLoginSession(String name, String email){
-        // Storing login value as TRUE
-        editor.putBoolean(IS_LOGIN, true);
-
-        // Storing name in pref
-        editor.putString(KEY_NAME, name);
-
-        // Storing email in pref
-        editor.putString(KEY_EMAIL, email);
-
-        // commit changes
-        editor.commit();
+    public void saveSPString (String keySP, String value){
+        spEditor.putString(keySP,value);
+        spEditor.commit();
     }
 
-    /**
-     * Check login method wil check user login status
-     * If false it will redirect user to login page
-     * Else won't do anything
-     * */
-    public void checkLogin(){
-        // Check login status
-        if(!this.isLoggedIn()){
-            // user is not logged in redirect him to Login Activity
-            Intent i = new Intent(_context, MainActivity.class);
-            // Closing all the Activities
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-            // Add new Flag to start new Activity
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // Staring Login Activity
-            _context.startActivity(i);
-        }
-
+    public void saveSPInt(String keySp, int value){
+        spEditor.putInt(keySp,value);
+        spEditor.commit();
     }
-
-
-
-    /**
-     * Get stored session data
-     * */
-    public HashMap<String, String> getUserDetails(){
-        HashMap<String, String> user = new HashMap<String, String>();
-        // user name
-        user.put(KEY_NAME, pref.getString(KEY_NAME, null));
-
-        // user email id
-        user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
-
-        // return user
-        return user;
-    }
-
-    /**
-     * Clear session details
-     * */
-    public void logoutUser(){
-        // Clearing all data from Shared Preferences
-        editor.clear();
-        editor.commit();
-
-        // After logout redirect user to Loing Activity
-        Intent i = new Intent(_context, MainActivity.class);
-        // Closing all the Activities
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        // Add new Flag to start new Activity
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // Staring Login Activity
-        _context.startActivity(i);
-    }
-
-    /**
-     * Quick check for login
-     * **/
-    // Get Login State
-    public boolean isLoggedIn(){
-        return pref.getBoolean(IS_LOGIN, false);
-    }
-    public void saveToken(String nama ) {
-        /*
-        String n = name.getText().toString();
-        String e = email.getText().toString();
-        SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(Name, n);
-        editor.putString(Email, e);
-        editor.commit();
-
-         */
-    }
-
-    public String getToken() {
-       /* name = (TextView) findViewById(R.id.etName);
-        email = (TextView) findViewById(R.id.etEmail);
-        sharedpreferences = getSharedPreferences(mypreference,
-                Context.MODE_PRIVATE);
-
-        if (sharedpreferences.contains(Name)) {
-            name.setText(sharedpreferences.getString(Name, ""));
-        }
-        if (sharedpreferences.contains(Email)) {
-            email.setText(sharedpreferences.getString(Email, ""));
-
-        }
-
-        */
-       return null;
+    public void saveSpBoolean(String keySp,boolean value){
+        spEditor.putBoolean(keySp,value);
+        spEditor.commit();
     }
 
     public String getEmail(){
-
-        return  null;
-
+        return sharedPreferences.getString(SP_EMAIL,"");
+    }
+    public String getPassword(){
+        return sharedPreferences.getString(SP_PASS,"");
     }
 
-    public String  getPassword(){
-        return null;
-
+    public Boolean isLoggedIn(){
+        return sharedPreferences.getBoolean(SP_SUDAH_LOGIN,false);
     }
 
+
+    public void saveToken(String namaToken, String tokenValue) {
+        spEditor.putString(namaToken,tokenValue);
+        spEditor.commit();
+       }
+
+
+    public String getToken() {
+        return sharedPreferences.getString(SP_DAPAT_TOKEN,"");
+
+          }
 }
